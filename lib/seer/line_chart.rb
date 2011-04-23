@@ -67,14 +67,16 @@ module Seer
   
     def data_columns  #:nodoc:
       _data_columns =  "            data.addRows(#{data.size});\n"
-      _data_columns << "            data.addColumn('string', 'Date');\n"
+      _data_columns << "            data.addColumn('string', 'distance');\n"
       # puts _data_columns
       # if data.first.respond_to?(series_label)
       #   data.each{ |datum| _data_columns << "            data.addColumn('number', '#{datum.send(series_label)}');\n" }
       # else
       #   data.each{ |datum| _data_columns << "            data.addColumn('number', '#{series_label}');\n" }
       # end
-      _data_columns << "            data.addColumn('number', '#{series_label}');\n"
+      data_series.each do |data_serie|
+        _data_columns << "            data.addColumn('number', '#{data_serie[:data_method]}');\n"
+      end
       puts _data_columns
       _data_columns
     end
@@ -83,7 +85,9 @@ module Seer
       # _rows = data_rows
       data.each_with_index do |column,i|
         @data_table << "data.setCell(#{i},0,'#{column.send(data_label)}');"
-        @data_table << "data.setCell(#{i},1,#{column.send(data_method)});"
+        j = 1
+        data_series.each do |data_serie|
+          @data_table << "data.setCell(#{i},#{j},#{column.send(data_serie[:data_method])});"
       end
       @data_table
     end
@@ -130,8 +134,6 @@ module Seer
         :data => data,
         :series_label   => args[:series][:series_label],
         :data_series    => args[:series][:data_series],
-        :data_label     => args[:series][:data_label],
-        :data_method    => args[:series][:data_method],
         :chart_options  => args[:chart_options],
         :chart_element  => args[:in_element] || 'chart'
       )
