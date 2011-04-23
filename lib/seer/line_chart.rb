@@ -66,25 +66,24 @@ module Seer
     end
   
     def data_columns  #:nodoc:
-      _data_columns =  "            data.addRows(#{data_rows.size});\r"
-      _data_columns << "            data.addColumn('string', 'Date');\r"
-      if data.first.respond_to?(series_label)
-        data.each{ |datum| _data_columns << "            data.addColumn('number', '#{datum.send(series_label)}');\r" }
-      else
-        data.each{ |datum| _data_columns << "            data.addColumn('number', '#{series_label}');\r" }
-      end
+      _data_columns =  "            data.addRows(#{data.size});\n"
+      _data_columns << "            data.addColumn('string', 'Date');\n"
+      # puts _data_columns
+      # if data.first.respond_to?(series_label)
+      #   data.each{ |datum| _data_columns << "            data.addColumn('number', '#{datum.send(series_label)}');\n" }
+      # else
+      #   data.each{ |datum| _data_columns << "            data.addColumn('number', '#{series_label}');\n" }
+      # end
+      _data_columns << "            data.addColumn('number', '#{series_label}');\n"
+      puts _data_columns
       _data_columns
     end
     
     def data_table  #:nodoc:
-      _rows = data_rows
-      _rows.each_with_index do |r,i|
-        @data_table << "            data.setCell(#{i}, 0,'#{r}');\r"
-      end
-      data_series.each_with_index do |column,i|
-        column.each_with_index do |c,j|
-          @data_table << "data.setCell(#{j},#{i+1},#{c.send(data_method)});\r"
-        end
+      # _rows = data_rows
+      data.each_with_index do |column,i|
+        @data_table << "data.setCell(#{i},0,'#{column.send(data_label)}');"
+        @data_table << "data.setCell(#{i},1,#{column.send(data_method)});"
       end
       @data_table
     end
@@ -104,15 +103,14 @@ module Seer
     end
     
     def to_js  #:nodoc:
-
-      %{
+      js =  %{
         <script type="text/javascript">
           google.load('visualization', '1', {'packages':['linechart']});
           google.setOnLoadCallback(drawChart);
           function drawChart() {
             var data = new google.visualization.DataTable();
 #{data_columns}
-#{data_table.to_s}
+#{data_table.join("\n")}
             var options = {};
 #{options}
             var container = document.getElementById('#{self.chart_element}');
@@ -121,6 +119,8 @@ module Seer
           }
         </script>
       }
+      puts js
+      js
     end
       
     # ====================================== Class Methods =========================================
