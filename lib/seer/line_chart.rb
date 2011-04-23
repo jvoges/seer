@@ -89,6 +89,7 @@ module Seer
         data_series.each do |data_serie|
           @data_table << "data.setCell(#{i},#{j},#{column.send(data_serie[:data_method])});"
           j += 1
+        end
       end
       @data_table
     end
